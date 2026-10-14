@@ -1,0 +1,28 @@
+# One dish per line:  name as written on your menu | preferred spelling | description
+# Lines starting with # are ignored. Edit this in the app (Glossary button) and it saves in your browser.
+ઊંધિયું / undhiyu | Undhiyu | Surat's winter specialty: mixed vegetables and beans slow-cooked with green masala and fenugreek dumplings
+ખમણ / khaman | Khaman | Soft, spongy steamed gram-flour cake tempered with mustard seeds and curry leaves
+ઢોકળા / dhokla | Dhokla | Light, tangy steamed cake of fermented rice and chickpea batter
+ફાફડા / fafda | Fafda | Crisp gram-flour strips, a classic breakfast served with chutney
+જલેબી / jalebi | Jalebi | Crisp spirals of fried batter soaked in sugar syrup
+હાંડવો / handvo | Handvo | Savory baked lentil-and-rice cake with vegetables and a crisp crust
+ખાંડવી / khandvi | Khandvi | Thin rolled sheets of gram-flour batter tempered with mustard and sesame
+થેપલા / thepla | Thepla | Soft spiced flatbread made with fenugreek and wheat flour
+દાળ ઢોકળી / dal dhokli | Dal Dhokli | Wheat-flour pieces simmered in a sweet-and-sour lentil soup
+કઢી / kadhi | Gujarati Kadhi | Light, sweet-and-tangy yogurt and gram-flour curry
+ખીચડી / khichdi | Khichdi | Comforting rice-and-lentil dish, often served with kadhi
+રીંગણનો ઓળો / ringan no oro | Ringan no Oro | Smoky roasted aubergine mash with onion, garlic and tomato
+ભાખરી / bhakri | Bhakri | Thick, crisp unleavened wheat flatbread
+શ્રીખંડ / shrikhand | Shrikhand | Thick strained-yogurt dessert flavored with saffron and cardamom
+બાસુંદી / basundi | Basundi | Slow-reduced sweetened milk with nuts and cardamom
+મોહનથાળ / mohanthal | Mohanthal | Rich gram-flour fudge made with ghee and nuts
+પાત્રા / patra | Patra | Colocasia leaves rolled with spiced gram-flour paste, steamed and sliced
+મુઠીયા / muthiya | Muthiya | Steamed or fried dumplings of gram flour and leafy greens
+સેવ ટમેટા / sev tameta | Sev Tameta | Tangy tomato curry topped with crisp sev
+લોચો / locho | Locho | Soft, steamy Surti gram-flour snack served with sev and chutney
+દાબેલી / dabeli | Dabeli | Kutchi street snack of spiced potato filling in a bun with peanuts and pomegranate
+રગડા પેટીસ / ragda pattice | Ragda Pattice | Potato patties topped with white pea curry and chutneys
+પૂરણ પોળી / puran poli | Puran Poli | Sweet flatbread stuffed with a lentil and jaggery filling
+ગાંઠિયા / gathiya | Gathiya | Crunchy fried gram-flour savory snack
+છાશ / chaas | Chaas | Spiced buttermilk
+ઘારી / ghari | Ghari | Surat's ghee-rich sweet pastry filled with mawa and nuts

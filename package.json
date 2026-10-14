@@ -1,0 +1,14 @@
+{
+  "name": "tablespeak",
+  "version": "1.0.0",
+  "description": "Menu translator for restaurants: translate a menu with open-weight models and keep every dish spelled the way you serve it.",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

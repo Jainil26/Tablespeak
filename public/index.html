@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablespeak: menu translator</title>
+<meta name="description" content="Translate a restaurant menu into any language and keep every dish spelled the way you serve it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;600&family=Rozha+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --indigo: #171b4d;
+  --indigo-2: #222866;
+  --ink: #efe8d6;
+  --ink-dim: rgba(239, 232, 214, 0.72);
+  --line: rgba(239, 232, 214, 0.24);
+  --turmeric: #f5b21b;
+  --chili: #c0301d;
+  --paper: #fffdf7;
+  --paper-ink: #23203a;
+  --paper-dim: #6b6780;
+  --display: "Rozha One", "Noto Sans Gujarati", serif;
+  --body: "Hanken Grotesk", "Noto Sans Gujarati", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font: 400 16px/1.55 var(--body);
+  background-color: var(--indigo);
+  /* bandhani tie-dye dots, the way the cloth is actually patterned */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='%23efe8d6' fill-opacity='.09'%3E%3Ccircle cx='28' cy='28' r='2.4'/%3E%3Ccircle cx='28' cy='20' r='1.5'/%3E%3Ccircle cx='28' cy='36' r='1.5'/%3E%3Ccircle cx='20' cy='28' r='1.5'/%3E%3Ccircle cx='36' cy='28' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+:focus-visible { outline: 2px solid var(--turmeric); outline-offset: 2px; }
+
+.shell { max-width: 1240px; margin: 0 auto; padding: 0 24px 64px; }
+
+/* header */
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0 8px; }
+.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand-name { font-family: var(--display); font-size: 1.9rem; line-height: 1; }
+.brand-tag { font-size: 1rem; color: var(--turmeric); font-weight: 600; }
+.head-actions { display: flex; gap: 10px; align-items: center; }
+
+/* layout */
+main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; align-items: start; padding-top: 28px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.2rem, 4.4vw, 3.3rem); line-height: 1.06; margin: 0 0 14px; max-width: 14ch; }
+.lede { margin: 0; color: var(--ink-dim); max-width: 46ch; }
+
+/* form */
+.field { display: grid; gap: 6px; margin-top: 22px; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+label { font-weight: 600; font-size: 0.92rem; }
+.hint { color: var(--ink-dim); font-size: 0.85rem; }
+input, textarea, select {
+  width: 100%; font: inherit; color: var(--ink);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px;
+}
+input::placeholder, textarea::placeholder { color: rgba(239, 232, 214, 0.45); }
+textarea { min-height: 270px; resize: vertical; line-height: 1.65; }
+select {
+  appearance: none; padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23efe8d6' stroke-width='1.8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+select option { color: #111; background: #fff; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn {
+  font: inherit; font-weight: 700; border-radius: 10px; padding: 12px 20px; cursor: pointer;
+  border: 1px solid transparent; transition: background-color 0.15s, transform 0.05s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--turmeric); color: var(--indigo); width: 100%; padding: 15px 20px; font-size: 1.05rem; margin-top: 26px; }
+.btn-primary:hover { background: #ffc43d; }
+.btn-primary[disabled] { opacity: 0.65; cursor: progress; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); font-weight: 600; padding: 9px 14px; font-size: 0.92rem; }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.09); }
+.link { background: none; border: 0; color: var(--turmeric); font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.error { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(192, 48, 29, 0.22); border: 1px solid rgba(255, 140, 120, 0.5); }
+.error[hidden] { display: none; }
+.fine { margin-top: 22px; color: var(--ink-dim); font-size: 0.85rem; max-width: 52ch; }
+
+/* output */
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; min-height: 40px; }
+.toolbar .who { margin-left: auto; color: var(--ink-dim); font-size: 0.85rem; }
+.menu-frame {
+  padding: 14px; border-radius: 6px; background-color: var(--turmeric);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='3' fill='%23c0301d'/%3E%3C/svg%3E");
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  box-shadow: 0 24px 60px rgba(5, 7, 30, 0.45);
+}
+.menu-paper { background: var(--paper); color: var(--paper-ink); padding: 40px 44px 28px; min-height: 540px; }
+.empty { color: var(--paper-dim); text-align: center; padding: 120px 20px; }
+.empty p { margin: 0 auto 14px; max-width: 34ch; }
+.empty .link { color: var(--chili); }
+
+.m-title { font-family: var(--display); font-weight: 400; font-size: 2.5rem; text-align: center; margin: 0; line-height: 1.1; }
+.m-sub { text-align: center; color: var(--paper-dim); margin: 6px 0 22px; font-size: 0.95rem; }
+.m-section { margin-top: 30px; }
+.m-section h3 { font-family: var(--display); font-weight: 400; color: var(--chili); font-size: 1.5rem; margin: 0 0 4px; padding-bottom: 8px; border-bottom: 2px dotted var(--chili); }
+.m-item { padding: 14px 0; border-bottom: 1px solid rgba(35, 32, 58, 0.1); animation: rise 0.45s both; animation-delay: calc(var(--i, 0) * 55ms); }
+.m-item:last-child { border-bottom: 0; }
+.m-row { display: flex; align-items: baseline; gap: 10px; }
+.m-name { font-weight: 700; font-size: 1.07rem; }
+.m-orig { color: var(--paper-dim); font-size: 0.9rem; }
+.m-leader { flex: 1; min-width: 16px; border-bottom: 2px dotted rgba(35, 32, 58, 0.28); transform: translateY(-4px); }
+.m-price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.m-desc { margin: 4px 0 0; color: #4a4660; font-size: 0.95rem; max-width: 56ch; }
+.m-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.pill { font-size: 0.78rem; font-weight: 600; color: var(--paper-ink); border: 1px solid rgba(35, 32, 58, 0.3); border-radius: 999px; padding: 1px 10px; }
+.m-dot { display: inline-block; width: 9px; height: 9px; margin-inline-end: 8px; border-radius: 50%; background: var(--turmeric); border: 1.5px solid var(--paper-ink); vertical-align: 1px; }
+.m-foot { margin-top: 30px; padding-top: 14px; border-top: 1px solid rgba(35, 32, 58, 0.14); color: var(--paper-dim); font-size: 0.82rem; }
+.m-foot p { margin: 2px 0; }
+
+/* loading skeleton */
+.sk { height: 14px; border-radius: 6px; margin: 14px 0; background: linear-gradient(90deg, #ece6d6 25%, #f8f3e6 50%, #ece6d6 75%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
+.sk.w1 { width: 46%; margin-inline: auto; height: 30px; } .sk.w2 { width: 30%; } .sk.w3 { width: 86%; } .sk.w4 { width: 72%; } .sk.w5 { width: 80%; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* glossary dialog */
+dialog { width: min(720px, 92vw); padding: 24px; border-radius: 14px; border: 1px solid var(--line); background: var(--indigo-2); color: var(--ink); }
+dialog::backdrop { background: rgba(8, 10, 35, 0.72); }
+dialog h2 { font-family: var(--display); font-weight: 400; margin: 0 0 6px; font-size: 1.7rem; }
+dialog textarea { min-height: 340px; font-size: 0.92rem; line-height: 1.55; margin-top: 14px; }
+.dlg-actions { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.dlg-actions .spacer { flex: 1; }
+.dlg-actions .btn-primary { width: auto; margin: 0; padding: 11px 22px; font-size: 1rem; }
+
+@media (max-width: 920px) {
+  main { grid-template-columns: 1fr; gap: 40px; }
+  h1 { max-width: none; }
+  .menu-paper { padding: 28px 22px 22px; }
+  .row { grid-template-columns: 1fr; }
+}
+.m-orig { white-space: nowrap; }
+@media (max-width: 520px) {
+  .m-row { flex-wrap: wrap; row-gap: 0; }
+  .m-name { flex: 1 1 60%; }
+  .m-leader { display: none; }
+  .m-price { margin-inline-start: auto; }
+  .m-orig { order: 3; flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .m-item { animation: none; }
+  .sk { animation: none; }
+}
+@media print {
+  body { background: #fff; color: #000; }
+  header, .left, .toolbar { display: none !important; }
+  .shell { padding: 0; max-width: none; }
+  main { display: block; padding: 0; }
+  .menu-frame { box-shadow: none; }
+  .m-item { break-inside: avoid; animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <span class="brand-name">Tablespeak</span>
+      <span class="brand-tag">menu translator</span>
+    </div>
+    <div class="head-actions">
+      <button class="btn btn-ghost" id="open-glossary" type="button">Glossary (<span id="g-count">0</span>)</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="left" aria-label="Menu input">
+      <h1>Your dishes, spelled the way you serve them.</h1>
+      <p class="lede">Paste your menu, pick a language, and get a printable translation. Dishes in your glossary keep the exact spelling and description you chose.</p>
+
+      <div class="field">
+        <label for="restaurant">Restaurant name <span class="hint">(optional)</span></label>
+        <input id="restaurant" type="text" maxlength="80" placeholder="Shree Annapurna Bhojanalay" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="menu">Menu text</label>
+          <button class="link" id="sample" type="button">Use a sample menu</button>
+        </div>
+        <textarea id="menu" maxlength="6000" placeholder="One dish per line, with the price if you have one. Gujarati, Hindi, English or a mix all work. Put section names (Starters, Mains) on their own line."></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="language">Translate into</label>
+          <select id="language"></select>
+        </div>
+        <div class="field">
+          <label for="model">Model</label>
+          <select id="model"></select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="go" type="button">Translate menu</button>
+      <div class="error" id="error" role="alert" hidden></div>
+      <p class="fine">Runs on open-weight models, so you can switch models or host your own without changing anything else.</p>
+    </section>
+
+    <section aria-label="Translated menu">
+      <div class="toolbar" id="toolbar" hidden>
+        <button class="btn btn-ghost" id="copy" type="button">Copy text</button>
+        <button class="btn btn-ghost" id="download" type="button">Download .txt</button>
+        <button class="btn btn-ghost" id="print" type="button">Print or save as PDF</button>
+        <span class="who" id="who"></span>
+      </div>
+      <div class="menu-frame">
+        <div class="menu-paper" id="paper" aria-live="polite">
+          <div class="empty">
+            <p>Your translated menu will appear here.</p>
+            <button class="link" id="sample2" type="button">Try it with a sample menu</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="glossary-dialog">
+  <h2>Your glossary</h2>
+  <p class="hint">One dish per line: <strong>name on your menu | preferred spelling | description</strong>. Translations always use your spelling and build the description from your note. Lines starting with # are ignored. Saved in this browser.</p>
+  <textarea id="glossary-text" spellcheck="false" aria-label="Glossary entries"></textarea>
+  <div class="dlg-actions">
+    <button class="btn btn-primary" id="glossary-save" type="button">Save glossary</button>
+    <button class="btn btn-ghost" id="glossary-close" type="button">Cancel</button>
+    <span class="spacer"></span>
+    <button class="link" id="glossary-reset" type="button">Reset to the starter list</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const KEY = { glossary: 'tablespeak.glossary', model: 'tablespeak.model', lang: 'tablespeak.lang' };
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } },
+  };
+
+  const SAMPLE = [
+    'સ્ટાર્ટર્સ',
+    'ખમણ ઢોકળા 80',
+    'ફાફડા જલેબી 120',
+    'હાંડવો 90',
+    'ભોજન',
+    'ઊંધિયું 180',
+    'ગુજરાતી કઢી ખીચડી 150',
+    'રીંગણનો ઓળો ભાખરી 160',
+    'દાળ ઢોકળી 170',
+    'મીઠાઈ',
+    'શ્રીખંડ 70',
+    'બાસુંદી 80',
+    'મોહનથાળ 60',
+  ].join('\n');
+
+  let defaultGlossary = '';
+  let glossaryText = '';
+  let config = { models: [], languages: [] };
+  let result = null;
+  let meta = { restaurant: '' };
+
+  function parseGlossary(text) {
+    return text.split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('#'))
+      .map((l) => l.split('|').map((p) => p.trim()))
+      .filter((p) => p.length >= 2 && p[0] && p[1])
+      .map((p) => ({ dish: p[0], english: p[1], note: p.slice(2).join(' | ') }));
+  }
+  function refreshCount() { $('#g-count').textContent = parseGlossary(glossaryText).length; }
+
+  function showError(msg) {
+    const el = $('#error');
+    el.textContent = msg || '';
+    el.hidden = !msg;
+  }
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function renderLoading() {
+    $('#toolbar').hidden = true;
+    const paper = $('#paper');
+    paper.removeAttribute('dir');
+    paper.replaceChildren();
+    ['w1', 'w2', 'w3', 'w4', 'w2', 'w5', 'w4', 'w3', 'w2', 'w5', 'w3'].forEach((w) => paper.appendChild(el('div', 'sk ' + w)));
+  }
+
+  function renderMenu() {
+    const paper = $('#paper');
+    paper.replaceChildren();
+    paper.setAttribute('lang', result.code);
+    if (result.rtl) paper.setAttribute('dir', 'rtl'); else paper.removeAttribute('dir');
+
+    paper.appendChild(el('h2', 'm-title', meta.restaurant || 'Menu'));
+    paper.appendChild(el('p', 'm-sub', result.language));
+
+    let n = 0;
+    let anyGlossary = false;
+    result.sections.forEach((s) => {
+      const sec = el('div', 'm-section');
+      if (s.title) sec.appendChild(el('h3', null, s.title));
+      s.items.forEach((it) => {
+        const item = el('div', 'm-item');
+        item.style.setProperty('--i', n++);
+        const row = el('div', 'm-row');
+        const name = el('span', 'm-name');
+        if (it.glossary) {
+          const dot = el('span', 'm-dot');
+          dot.title = 'Matches your glossary';
+          name.appendChild(dot);
+          anyGlossary = true;
+        }
+        name.appendChild(document.createTextNode(it.name));
+        row.appendChild(name);
+        if (it.original && it.original.toLowerCase() !== it.name.toLowerCase()) {
+          const o = el('span', 'm-orig', it.original);
+          o.setAttribute('lang', 'gu');
+          row.appendChild(o);
+        }
+        row.appendChild(el('span', 'm-leader'));
+        if (it.price) row.appendChild(el('span', 'm-price', it.price));
+        item.appendChild(row);
+        if (it.description) item.appendChild(el('p', 'm-desc', it.description));
+        if (it.tags.length && result.code === 'en') {
+          const tags = el('div', 'm-tags');
+          it.tags.forEach((t) => tags.appendChild(el('span', 'pill', t.charAt(0).toUpperCase() + t.slice(1))));
+          item.appendChild(tags);
+        }
+        sec.appendChild(item);
+      });
+      paper.appendChild(sec);
+    });
+
+    const foot = el('div', 'm-foot');
+    if (anyGlossary) {
+      const p = el('p');
+      const dot = el('span', 'm-dot');
+      p.appendChild(dot);
+      p.appendChild(document.createTextNode('Spelling and description come from the restaurant\'s own glossary.'));
+      foot.appendChild(p);
+    }
+    if (result.scriptWarning) {
+      foot.appendChild(el('p', null, 'This model answered partly in English. Try another model for a better ' + result.language + ' menu.'));
+    }
+    foot.appendChild(el('p', null, 'Translated by AI. Check ingredients and allergens before printing.'));
+    paper.appendChild(foot);
+
+    $('#who').textContent = 'Model: ' + result.model;
+    $('#toolbar').hidden = false;
+  }
+
+  function toText() {
+    const lines = [];
+    lines.push((meta.restaurant || 'Menu').toUpperCase());
+    lines.push(result.language, '');
+    result.sections.forEach((s) => {
+      if (s.title) lines.push(s.title.toUpperCase());
+      s.items.forEach((it) => {
+        lines.push('- ' + it.name + (it.price ? ' ... ' + it.price : ''));
+        if (it.description) lines.push('  ' + it.description);
+      });
+      lines.push('');
+    });
+    return lines.join('\n').trim() + '\n';
+  }
+
+  async function translate() {
+    showError('');
+    const menu = $('#menu').value.trim();
+    if (!menu) { showError('Paste your menu text first, or try the sample menu.'); $('#menu').focus(); return; }
+
+    const btn = $('#go');
+    btn.disabled = true;
+    btn.textContent = 'Translating…';
+    renderLoading();
+    meta = { restaurant: $('#restaurant').value.trim() };
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          menu,
+          language: $('#language').value,
+          model: $('#model').value,
+          glossary: parseGlossary(glossaryText),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Translation failed. Try again.');
+      result = data;
+      renderMenu();
+      if (window.matchMedia('(max-width: 920px)').matches) {
+        $('#toolbar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (err) {
+      showError(err.message || 'Translation failed. Try again.');
+      result = null;
+      const paper = $('#paper');
+      paper.replaceChildren();
+      const empty = el('div', 'empty');
+      empty.appendChild(el('p', null, 'Nothing was translated. Fix the problem on the left and press Translate menu again.'));
+      paper.appendChild(empty);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Translate menu';
+    }
+  }
+
+  function useSample() {
+    $('#menu').value = SAMPLE;
+    if (!$('#restaurant').value) $('#restaurant').value = 'Shree Annapurna Bhojanalay';
+    $('#menu').focus();
+  }
+
+  async function init() {
+    try {
+      const [cfg, g] = await Promise.all([fetch('/api/config').then((r) => r.json()), fetch('/glossary.txt').then((r) => r.text())]);
+      config = cfg;
+      defaultGlossary = g;
+    } catch (err) {
+      showError('Could not load the app settings. Is the server running?');
+    }
+    glossaryText = store.get(KEY.glossary) || defaultGlossary;
+    refreshCount();
+
+    const langSel = $('#language');
+    config.languages.forEach((l) => langSel.appendChild(new Option(l.name, l.name)));
+    langSel.value = store.get(KEY.lang) || 'English';
+    if (!langSel.value) langSel.value = 'English';
+
+    const modelSel = $('#model');
+    config.models.forEach((m) => modelSel.appendChild(new Option(m.label, m.id)));
+    const savedModel = store.get(KEY.model);
+    if (savedModel && config.models.some((m) => m.id === savedModel)) modelSel.value = savedModel;
+
+    langSel.addEventListener('change', () => store.set(KEY.lang, langSel.value));
+    modelSel.addEventListener('change', () => store.set(KEY.model, modelSel.value));
+  }
+
+  $('#go').addEventListener('click', translate);
+  $('#sample').addEventListener('click', useSample);
+  $('#sample2').addEventListener('click', useSample);
+  $('#print').addEventListener('click', () => window.print());
+
+  $('#copy').addEventListener('click', async (e) => {
+    if (!result) return;
+    const btn = e.currentTarget;
+    try { await navigator.clipboard.writeText(toText()); btn.textContent = 'Copied'; }
+    catch (err) { btn.textContent = 'Copy failed'; }
+    setTimeout(() => { btn.textContent = 'Copy text'; }, 1600);
+  });
+
+  $('#download').addEventListener('click', () => {
+    if (!result) return;
+    const slug = (meta.restaurant || 'menu').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'menu';
+    const url = URL.createObjectURL(new Blob([toText()], { type: 'text/plain;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = slug + '-' + result.code + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  const dlg = $('#glossary-dialog');
+  $('#open-glossary').addEventListener('click', () => { $('#glossary-text').value = glossaryText; dlg.showModal(); });
+  $('#glossary-close').addEventListener('click', () => dlg.close());
+  $('#glossary-save').addEventListener('click', () => {
+    glossaryText = $('#glossary-text').value;
+    store.set(KEY.glossary, glossaryText);
+    refreshCount();
+    dlg.close();
+  });
+  $('#glossary-reset').addEventListener('click', () => { $('#glossary-text').value = defaultGlossary; });
+
+  init();
+})();
+</script>
+</body>
+</html>
